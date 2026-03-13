@@ -110,8 +110,7 @@ function getSummary() {
   for (let i = 1; i < data.length; i++) {
     const row    = data[i];
     const name   = String(row[1]).trim();
-    const status = String(row[9]).trim().toLowerCase(); // col J
-    const amount = parseFloat(row[10]) || 0;            // col K
+    const amount = parseFloat(row[10]) || 0; // col K
 
     if (!name && amount === 0) continue; // skip empty rows
 
@@ -120,11 +119,7 @@ function getSummary() {
     totalKids    += (parseInt(row[4]) || 0) + (parseInt(row[5]) || 0); // E + F
     totalVeg     += parseInt(row[7]) || 0;                              // H
     totalChicken += parseInt(row[8]) || 0;                              // I
-
-    // Count amount if paid, or if status is blank (assumed paid)
-    if (status === 'paid' || status === 'completed' || status === 'done' || status === '') {
-      totalCollected += amount;
-    }
+    totalCollected += amount; // sum all rows regardless of status (Confirmed, Paid, etc.)
   }
 
   return {
