@@ -123,7 +123,22 @@ function getSummary() {
     totalKids,
     totalChicken,
     totalVeg,
+    categories: getCategoryBreakdown(),
   };
+}
+// ── Sheet 3 category breakdown (col A=label, B=total, C=paid) ────
+function getCategoryBreakdown() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Sheet3');
+  if (!sheet) return [];
+  const data       = sheet.getDataRange().getValues();
+  const categories = [];
+  for (let i = 0; i < data.length; i++) {
+    const label = String(data[i][0]).trim();
+    const total = parseInt(data[i][1]) || 0;
+    const paid  = parseInt(data[i][2]) || 0;
+    if (label) categories.push({ label, total, paid });
+  }
+  return categories;
 }
 // ── Search rows by name (partial, case-insensitive) ───────────────
 function searchByName(query) {
