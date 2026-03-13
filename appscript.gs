@@ -16,7 +16,8 @@
 //   K  Amount
 //   L  Payment Date
 // ─────────────────────────────────────────────────────────────────
-const SHEET_NAME = 'Sheet1'; // change to match your sheet tab name
+const SHEET_NAME  = 'Sheet1'; // main data sheet
+const SHEET3_NAME = 'Sheet3'; // category summary sheet
 function getSheet() {
   return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
 }
@@ -129,7 +130,23 @@ function getSummary() {
     totalKids,
     totalChicken,
     totalVeg,
+    categories: getCategoryBreakdown(),
   };
+}
+
+// ── Read Sheet 3 category breakdown (col A = label, B = total, C = paid) ──
+function getCategoryBreakdown() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET3_NAME);
+  if (!sheet) return [];
+  const data = sheet.getDataRange().getValues();
+  const categories = [];
+  for (let i = 0; i < data.length; i++) {
+    const label = String(data[i][0]).trim();
+    const total = parseInt(data[i][1]) || 0;
+    const paid  = parseInt(data[i][2]) || 0;
+    if (label) categories.push({ label, total, paid });
+  }
+  return categories;
 }
 
 // ── Search rows by name (partial, case-insensitive) ───────────────

@@ -147,11 +147,12 @@
       color: #1a7a4a;
     }
 
-    /* ── Stats grid ── */
+    /* ── Stats grid (meal/misc totals) ── */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
       gap: 14px;
+      margin-bottom: 0;
     }
     .stat-box {
       background: var(--bg);
@@ -175,6 +176,56 @@
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
+
+    /* ── Category breakdown table ── */
+    .cat-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .cat-table thead th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      padding: 0 10px 10px 0;
+      border-bottom: 1.5px solid var(--border);
+    }
+    .cat-table thead th:last-child { text-align: right; padding-right: 0; }
+    .cat-table tbody tr { border-bottom: 1px solid var(--border); }
+    .cat-table tbody tr:last-child { border-bottom: none; }
+    .cat-table td {
+      padding: 10px 10px 10px 0;
+      vertical-align: middle;
+    }
+    .cat-table td:last-child { padding-right: 0; }
+    .cat-label { font-weight: 600; color: var(--text); }
+    .cat-bar-wrap {
+      background: #e8f5ee;
+      border-radius: 999px;
+      height: 8px;
+      width: 100%;
+      min-width: 60px;
+      overflow: hidden;
+    }
+    .cat-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #1a7a4a, #27ae60);
+      transition: width 1s cubic-bezier(0.22,1,0.36,1);
+    }
+    .cat-fraction {
+      text-align: right;
+      white-space: nowrap;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .cat-fraction .paid-num { color: #1a7a4a; }
+    .cat-fraction .sep { color: var(--muted); margin: 0 1px; }
+    .cat-fraction .total-num { color: var(--muted); font-weight: 500; }
 
     /* ── Search ── */
     .search-row {
@@ -342,9 +393,17 @@
     </div>
   </div>
 
+  <!-- ── Category breakdown card ── -->
+  <div class="card" id="categories-card">
+    <div class="card-title">Payment Progress by Category</div>
+    <div id="categories-content">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
   <!-- ── Stats card ── -->
   <div class="card" id="stats-card">
-    <div class="card-title">Summary</div>
+    <div class="card-title">Meal Summary</div>
     <div id="stats-content">
       <div class="loading"><div class="spinner"></div></div>
     </div>
@@ -418,7 +477,47 @@
         if (bar) bar.style.width = pct + '%';
       }));
 
-      // Stats card
+      // Category breakdown card (from Sheet 3)
+      const cats = Array.isArray(data.categories) ? data.categories : [];
+      if (cats.length) {
+        const rows = cats.map(c => {
+          const pct = c.total > 0 ? Math.round((c.paid / c.total) * 100) : 0;
+          return `
+            <tr>
+              <td class="cat-label">${c.label}</td>
+              <td style="width:40%;padding-right:14px">
+                <div class="cat-bar-wrap">
+                  <div class="cat-bar-fill" style="width:${pct}%"></div>
+                </div>
+              </td>
+              <td class="cat-fraction">
+                <span class="paid-num">${c.paid}</span><span class="sep">/</span><span class="total-num">${c.total}</span>
+              </td>
+            </tr>`;
+        }).join('');
+        setEl('categories-content', `
+          <table class="cat-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Progress</th>
+                <th style="text-align:right">Paid / Total</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `);
+        // Animate bars after paint
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          document.querySelectorAll('.cat-bar-fill').forEach(b => {
+            b.style.width = b.style.width; // trigger reflow already set
+          });
+        }));
+      } else {
+        setEl('categories-content', '<div class="no-result">No category data found in Sheet 3.</div>');
+      }
+
+      // Stats card (meal totals)
       setEl('stats-content', `
         <div class="stats-grid">
           <div class="stat-box">
@@ -454,6 +553,7 @@
 
     } catch (err) {
       setEl('progress-content', `<div class="error-msg">⚠️ Could not load data — ${err.message}</div>`);
+      setEl('categories-content', '');
       setEl('stats-content', '');
       setEl('last-updated', 'Failed to load');
     }
