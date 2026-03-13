@@ -352,6 +352,56 @@
     .refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
     .refresh-btn svg { width: 14px; height: 14px; fill: currentColor; }
 
+    /* ── Recent payments ── */
+    .recent-list { list-style: none; }
+    .recent-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .recent-item:last-child { border-bottom: none; }
+    .recent-avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .recent-info { flex: 1; min-width: 0; }
+    .recent-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .recent-time {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .recent-amount {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1a7a4a;
+      white-space: nowrap;
+    }
+    .recent-status {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .recent-status.paid   { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; }
+    .recent-status.pending{ background: #fef5e7; color: #9a5000; border: 1px solid #fad7a0; }
+
     @media (max-width: 540px) {
       header { padding: 24px 16px 20px; }
       header .flag-strip { font-size: 22px; margin-bottom: 10px; }
@@ -423,6 +473,14 @@
       <button id="search-btn">Search</button>
     </div>
     <div id="search-results"></div>
+  </div>
+
+  <!-- ── Recent payments card ── -->
+  <div class="card">
+    <div class="card-title">Recent Payments</div>
+    <div id="recent-content">
+      <div class="loading"><div class="spinner"></div> Fetching…</div>
+    </div>
   </div>
 
 </main>
@@ -599,6 +657,42 @@
     }
   }
 
+  // ── Recent payments ──────────────────────────────────────────────
+  async function loadRecent() {
+    try {
+      const data = await fetchJSON(`${SCRIPT_URL}?action=recent`);
+      if (data.error) throw new Error(data.error);
+
+      const rows = Array.isArray(data.results) ? data.results : [];
+      if (!rows.length) {
+        setEl('recent-content', '<div class="no-result">No payments recorded yet.</div>');
+        return;
+      }
+
+      const items = rows.map(r => {
+        const initials = (r.name || '?').trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        const ts       = r.timestamp ? new Date(r.timestamp).toLocaleString('en-AU', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+        const isPaid   = (r.status || '').toLowerCase().includes('paid');
+        const statusCls = isPaid ? 'paid' : 'pending';
+        const amountHtml = r.amount ? `<div class="recent-amount">$${fmt(r.amount)}</div>` : '';
+        return `
+          <li class="recent-item">
+            <div class="recent-avatar">${initials}</div>
+            <div class="recent-info">
+              <div class="recent-name">${r.name}</div>
+              <div class="recent-time">${ts}</div>
+            </div>
+            ${amountHtml}
+            ${r.status ? `<span class="recent-status ${statusCls}">${r.status}</span>` : ''}
+          </li>`;
+      }).join('');
+
+      setEl('recent-content', `<ul class="recent-list">${items}</ul>`);
+    } catch (err) {
+      setEl('recent-content', `<div class="error-msg">⚠️ Could not load recent payments — ${err.message}</div>`);
+    }
+  }
+
   // ── Events ───────────────────────────────────────────────────────
   document.getElementById('search-btn').addEventListener('click', doSearch);
   document.getElementById('search-input').addEventListener('keydown', e => {
@@ -607,6 +701,7 @@
 
   // ── Init ─────────────────────────────────────────────────────────
   loadSummary();
+  loadRecent();
 </script>
 
 </body>
