@@ -14,8 +14,8 @@
       --text:      #2c3e50;
       --muted:     #7f8c8d;
       --border:    #e0d6c8;
-      --bar-bg:    #e8ddd0;
-      --bar-fill:  linear-gradient(90deg, #c0392b 0%, #e67e22 60%, #f1c40f 100%);
+      --bar-bg:    #d6ede1;
+      --bar-fill:  linear-gradient(90deg, #1a7a4a 0%, #27ae60 55%, #58d68d 100%);
       --shadow:    0 4px 18px rgba(0,0,0,0.08);
       --radius:    14px;
     }
@@ -144,7 +144,7 @@
       text-align: right;
       font-size: 0.85rem;
       font-weight: 600;
-      color: var(--accent);
+      color: #1a7a4a;
     }
 
     /* ── Stats grid ── */
@@ -301,9 +301,23 @@
     .refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
     .refresh-btn svg { width: 14px; height: 14px; fill: currentColor; }
 
-    @media (max-width: 480px) {
-      .card { padding: 18px 16px; }
+    @media (max-width: 540px) {
+      header { padding: 24px 16px 20px; }
+      header .flag-strip { font-size: 22px; margin-bottom: 10px; }
+      main { padding: 16px 12px 48px; }
+      .card { padding: 16px 14px; margin-bottom: 14px; }
       .amount-collected { font-size: 2.2rem; }
+      .goal-header { flex-direction: column; align-items: flex-start; }
+      .goal-label { text-align: left; }
+      .progress-wrap { height: 26px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .stat-box { padding: 14px 10px; }
+      .stat-value { font-size: 1.6rem; }
+      .search-row { flex-direction: column; }
+      .search-row input,
+      .search-row button { width: 100%; min-width: unset; }
+      .search-row button { padding: 14px; font-size: 1rem; }
+      .pill { font-size: 0.75rem; padding: 4px 10px; }
     }
   </style>
 </head>
