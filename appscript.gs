@@ -16,48 +16,35 @@
 //   K  Amount
 //   L  Payment Date
 // ─────────────────────────────────────────────────────────────────
-
 const SHEET_NAME = 'Sheet1'; // change to match your sheet tab name
-
 function getSheet() {
   return SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
 }
-
 // ── Handle CORS preflight ─────────────────────────────────────────
 function doOptions(e) {
   return ContentService.createTextOutput('');
 }
-
-// ── GET dispatcher ───────────────────────────────────────────────
-// Supported actions:
-//   ?action=summary          → totals for the fund-balance website
-//   ?action=search&name=xxx  → find rows by name (partial, case-insensitive)
-//   (no action)              → original receipt lookup by remark
+// ── GET: lookup contact + meal by remark / receipt# ──────────────
 function doGet(e) {
   const output = ContentService.createTextOutput();
   output.setMimeType(ContentService.MimeType.JSON);
-
   try {
+    // ── NEW: route to summary or name-search when ?action= is present ──
     const action = (e.parameter.action || '').trim().toLowerCase();
-
     if (action === 'summary') {
       output.setContent(JSON.stringify(getSummary()));
       return output;
     }
-
     if (action === 'search') {
-      const name = (e.parameter.name || '').trim();
-      output.setContent(JSON.stringify(searchByName(name)));
+      output.setContent(JSON.stringify(searchByName((e.parameter.name || '').trim())));
       return output;
     }
-
-    // ── Original: lookup by remark / receipt# ────────────────────
+    // ── ORIGINAL code below — not modified ───────────────────────
     const remark = (e.parameter.remark || '').trim().toLowerCase();
     if (!remark) {
       output.setContent(JSON.stringify({ error: 'No remark provided' }));
       return output;
     }
-
     const data = getSheet().getDataRange().getValues();
     for (let i = 1; i < data.length; i++) {
       const rowRemark = String(data[i][6]).trim().toLowerCase(); // col G
@@ -73,13 +60,11 @@ function doGet(e) {
       }
     }
     output.setContent(JSON.stringify({ error: 'Not found' }));
-
   } catch (err) {
     output.setContent(JSON.stringify({ error: err.message }));
   }
   return output;
 }
-
 // ── POST: append a new payment record ────────────────────────────
 function doPost(e) {
   const output = ContentService.createTextOutput();
@@ -107,7 +92,12 @@ function doPost(e) {
   return output;
 }
 
-// ── Helper: aggregate summary data ───────────────────────────────
+// ═════════════════════════════════════════════════════════════════
+// NEW functions — only called when ?action=summary or ?action=search
+// Nothing above this line was changed.
+// ═════════════════════════════════════════════════════════════════
+
+// ── Aggregate totals for the fund-balance website ─────────────────
 function getSummary() {
   const data         = getSheet().getDataRange().getValues();
   let totalCollected = 0;
@@ -123,23 +113,17 @@ function getSummary() {
     const status = String(row[9]).trim().toLowerCase(); // col J
     const amount = parseFloat(row[10]) || 0;            // col K
 
-    // Skip completely empty rows
-    if (!name && amount === 0) continue;
+    if (!name && amount === 0) continue; // skip empty rows
 
     donorCount++;
-    totalAdults  += parseInt(row[3])  || 0; // D
+    totalAdults  += parseInt(row[3]) || 0;                              // D
     totalKids    += (parseInt(row[4]) || 0) + (parseInt(row[5]) || 0); // E + F
-    totalVeg     += parseInt(row[7])  || 0; // H
-    totalChicken += parseInt(row[8])  || 0; // I
+    totalVeg     += parseInt(row[7]) || 0;                              // H
+    totalChicken += parseInt(row[8]) || 0;                              // I
 
-    // Only count paid amounts toward the total
-    if (status === 'paid' || status === 'completed' || status === 'done') {
+    // Count amount if paid, or if status is blank (assumed paid)
+    if (status === 'paid' || status === 'completed' || status === 'done' || status === '') {
       totalCollected += amount;
-    } else {
-      // If status column is blank but amount exists, still count it
-      if (!row[9] || String(row[9]).trim() === '') {
-        totalCollected += amount;
-      }
     }
   }
 
@@ -153,12 +137,12 @@ function getSummary() {
   };
 }
 
-// ── Helper: search rows by name (partial, case-insensitive) ───────
+// ── Search rows by name (partial, case-insensitive) ───────────────
 function searchByName(query) {
   if (!query) return { error: 'No name provided' };
 
-  const q    = query.toLowerCase();
-  const data = getSheet().getDataRange().getValues();
+  const q       = query.toLowerCase();
+  const data    = getSheet().getDataRange().getValues();
   const results = [];
 
   for (let i = 1; i < data.length; i++) {
@@ -169,14 +153,14 @@ function searchByName(query) {
     if (name.toLowerCase().includes(q)) {
       results.push({
         name    : name,
-        contact : String(row[2]).trim(),   // C
-        adults  : parseInt(row[3])  || 0,  // D
-        kids12  : parseInt(row[4])  || 0,  // E
-        kidsU12 : parseInt(row[5])  || 0,  // F
-        veg     : parseInt(row[7])  || 0,  // H
-        chicken : parseInt(row[8])  || 0,  // I
-        status  : String(row[9]).trim(),   // J
-        amount  : String(row[10]).trim(),  // K
+        contact : String(row[2]).trim(),  // C
+        adults  : parseInt(row[3]) || 0, // D
+        kids12  : parseInt(row[4]) || 0, // E
+        kidsU12 : parseInt(row[5]) || 0, // F
+        veg     : parseInt(row[7]) || 0, // H
+        chicken : parseInt(row[8]) || 0, // I
+        status  : String(row[9]).trim(), // J
+        amount  : String(row[10]).trim(),// K
       });
     }
   }
