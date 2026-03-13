@@ -606,6 +606,9 @@
         </div>
       `);
 
+      // Recent payments
+      renderRecent(Array.isArray(data.recentPayments) ? data.recentPayments : []);
+
       // Timestamp
       setEl('last-updated', `Last updated: ${new Date().toLocaleString('en-AU')}`);
 
@@ -613,6 +616,7 @@
       setEl('progress-content', `<div class="error-msg">⚠️ Could not load data — ${err.message}</div>`);
       setEl('categories-content', '');
       setEl('stats-content', '');
+      setEl('recent-content', '');
       setEl('last-updated', 'Failed to load');
     }
   }
@@ -657,40 +661,30 @@
     }
   }
 
-  // ── Recent payments ──────────────────────────────────────────────
-  async function loadRecent() {
-    try {
-      const data = await fetchJSON(`${SCRIPT_URL}?action=recent`);
-      if (data.error) throw new Error(data.error);
-
-      const rows = Array.isArray(data.results) ? data.results : [];
-      if (!rows.length) {
-        setEl('recent-content', '<div class="no-result">No payments recorded yet.</div>');
-        return;
-      }
-
-      const items = rows.map(r => {
-        const initials = (r.name || '?').trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
-        const ts       = r.timestamp ? new Date(r.timestamp).toLocaleString('en-AU', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
-        const isPaid   = (r.status || '').toLowerCase().includes('paid');
-        const statusCls = isPaid ? 'paid' : 'pending';
-        const amountHtml = r.amount ? `<div class="recent-amount">$${fmt(r.amount)}</div>` : '';
-        return `
-          <li class="recent-item">
-            <div class="recent-avatar">${initials}</div>
-            <div class="recent-info">
-              <div class="recent-name">${r.name}</div>
-              <div class="recent-time">${ts}</div>
-            </div>
-            ${amountHtml}
-            ${r.status ? `<span class="recent-status ${statusCls}">${r.status}</span>` : ''}
-          </li>`;
-      }).join('');
-
-      setEl('recent-content', `<ul class="recent-list">${items}</ul>`);
-    } catch (err) {
-      setEl('recent-content', `<div class="error-msg">⚠️ Could not load recent payments — ${err.message}</div>`);
+  // ── Recent payments (rendered from summary data) ─────────────────
+  function renderRecent(rows) {
+    if (!rows || !rows.length) {
+      setEl('recent-content', '<div class="no-result">No payments recorded yet.</div>');
+      return;
     }
+    const items = rows.map(r => {
+      const initials  = (r.name || '?').trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+      const ts        = r.timestamp ? new Date(r.timestamp).toLocaleString('en-AU', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+      const isPaid    = (r.status || '').toLowerCase().includes('paid');
+      const statusCls = isPaid ? 'paid' : 'pending';
+      const amountHtml = r.amount ? `<div class="recent-amount">$${fmt(r.amount)}</div>` : '';
+      return `
+        <li class="recent-item">
+          <div class="recent-avatar">${initials}</div>
+          <div class="recent-info">
+            <div class="recent-name">${r.name}</div>
+            <div class="recent-time">${ts}</div>
+          </div>
+          ${amountHtml}
+          ${r.status ? `<span class="recent-status ${statusCls}">${r.status}</span>` : ''}
+        </li>`;
+    }).join('');
+    setEl('recent-content', `<ul class="recent-list">${items}</ul>`);
   }
 
   // ── Events ───────────────────────────────────────────────────────
@@ -701,7 +695,6 @@
 
   // ── Init ─────────────────────────────────────────────────────────
   loadSummary();
-  loadRecent();
 </script>
 
 </body>
