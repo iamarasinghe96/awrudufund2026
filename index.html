@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Albury Wodonga අවුරුදු උළෙල 2026 — Collection Status</title>
+  <style>
+    :root {
+      --primary:   #c0392b;
+      --accent:    #e67e22;
+      --gold:      #f1c40f;
+      --bg:        #fdf6ec;
+      --card:      #ffffff;
+      --text:      #2c3e50;
+      --muted:     #7f8c8d;
+      --border:    #e0d6c8;
+      --bar-bg:    #e8ddd0;
+      --bar-fill:  linear-gradient(90deg, #c0392b 0%, #e67e22 60%, #f1c40f 100%);
+      --shadow:    0 4px 18px rgba(0,0,0,0.08);
+      --radius:    14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #8B0000 0%, #c0392b 50%, #e67e22 100%);
+      color: #fff;
+      text-align: center;
+      padding: 36px 20px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    header .flag-strip {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-size: 28px;
+    }
+    header h1 {
+      font-size: clamp(1.3rem, 4vw, 2rem);
+      font-weight: 700;
+      line-height: 1.3;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    header h1 span {
+      display: block;
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      font-weight: 400;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+    .last-updated {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+
+    /* ── Main layout ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 28px 16px 60px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 26px 28px;
+      margin-bottom: 22px;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Progress bar ── */
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .amount-collected {
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .amount-collected sup { font-size: 0.5em; vertical-align: top; margin-top: 6px; display: inline-block; }
+    .goal-label {
+      text-align: right;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+    .goal-label strong { color: var(--text); font-size: 1.1rem; }
+
+    .progress-wrap {
+      background: var(--bar-bg);
+      border-radius: 999px;
+      height: 22px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--bar-fill);
+      transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+      position: relative;
+    }
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 60%);
+      border-radius: 999px;
+    }
+    .progress-pct {
+      text-align: right;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* ── Stats grid ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 14px;
+    }
+    .stat-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 14px;
+      text-align: center;
+    }
+    .stat-icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .stat-value {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 5px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Search ── */
+    .search-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .search-row input {
+      flex: 1;
+      min-width: 180px;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background: var(--bg);
+    }
+    .search-row input:focus { border-color: var(--primary); }
+    .search-row button {
+      padding: 12px 22px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .search-row button:hover { background: #a93226; }
+
+    /* ── Search results ── */
+    #search-results { margin-top: 18px; }
+
+    .result-card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      background: var(--bg);
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .result-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .result-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .pill-adults    { background: #eaf4fb; color: #2471a3; border: 1px solid #aed6f1; }
+    .pill-kids      { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; }
+    .pill-chicken   { background: #fef9e7; color: #9a7d0a; border: 1px solid #f9e79f; }
+    .pill-veg       { background: #f4ecf7; color: #7d3c98; border: 1px solid #d7bde2; }
+    .pill-amount    { background: #fdf2f0; color: var(--primary); border: 1px solid #f5b7b1; }
+    .pill-status    { background: #e8f8f5; color: #1a7a5e; border: 1px solid #a2d9ce; }
+    .pill-status.pending { background: #fef5e7; color: #9a5000; border: 1px solid #fad7a0; }
+
+    .no-result {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px 0;
+      font-size: 0.95rem;
+    }
+
+    /* ── Loading spinner ── */
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      padding: 24px 0;
+      color: var(--muted);
+    }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error ── */
+    .error-msg {
+      background: #fdf0ef;
+      border: 1px solid #f5b7b1;
+      border-radius: 8px;
+      padding: 14px 18px;
+      color: var(--primary);
+      font-size: 0.9rem;
+    }
+
+    /* ── Refresh button ── */
+    .refresh-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 18px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+    .refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .refresh-btn svg { width: 14px; height: 14px; fill: currentColor; }
+
+    @media (max-width: 480px) {
+      .card { padding: 18px 16px; }
+      .amount-collected { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="flag-strip">🇱🇰 🎉 🇦🇺</div>
+  <h1>
+    Albury Wodonga
+    <span>අවුරුදු උළෙල 2026 — Collection Status</span>
+  </h1>
+  <div class="last-updated" id="last-updated">Loading…</div>
+</header>
+
+<main>
+
+  <!-- ── Progress card ── -->
+  <div class="card" id="progress-card">
+    <div class="card-title">Fundraising Progress</div>
+    <div id="progress-content">
+      <div class="loading"><div class="spinner"></div> Fetching data…</div>
+    </div>
+  </div>
+
+  <!-- ── Stats card ── -->
+  <div class="card" id="stats-card">
+    <div class="card-title">Summary</div>
+    <div id="stats-content">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- ── Search card ── -->
+  <div class="card">
+    <div class="card-title">Search by Name</div>
+    <div class="search-row">
+      <input
+        type="text"
+        id="search-input"
+        placeholder="Enter name…"
+        autocomplete="off"
+        autocorrect="off"
+      />
+      <button id="search-btn">Search</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+
+</main>
+
+<script>
+  // ── Config ──────────────────────────────────────────────────────
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyXUayT8H78d55ZDvsR9qoLQ8USMVhmOZPdAomU23zthObR38cPDfTB2tN7CUop0cQL/exec';
+  const GOAL       = 3254.5;
+
+  // ── Helpers ─────────────────────────────────────────────────────
+  const fmt  = n => Number(n).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtN = n => Number(n).toLocaleString('en-AU');
+
+  function setEl(id, html) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+
+  async function fetchJSON(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  // ── Load summary ─────────────────────────────────────────────────
+  async function loadSummary() {
+    try {
+      const data = await fetchJSON(`${SCRIPT_URL}?action=summary`);
+      if (data.error) throw new Error(data.error);
+
+      const collected = parseFloat(data.totalCollected) || 0;
+      const pct       = Math.min((collected / GOAL) * 100, 100).toFixed(1);
+      const remaining = Math.max(GOAL - collected, 0);
+
+      // Progress card
+      setEl('progress-content', `
+        <div class="goal-header">
+          <div class="amount-collected"><sup>$</sup>${fmt(collected)}</div>
+          <div class="goal-label">
+            Goal <strong>$${fmt(GOAL)}</strong><br>
+            <span style="color:var(--accent)">$${fmt(remaining)} to go</span>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-fill" id="bar" style="width:0%"></div>
+        </div>
+        <div class="progress-pct">${pct}% reached</div>
+      `);
+      // Animate bar after paint
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const bar = document.getElementById('bar');
+        if (bar) bar.style.width = pct + '%';
+      }));
+
+      // Stats card
+      setEl('stats-content', `
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value">${fmtN(data.donorCount)}</div>
+            <div class="stat-label">Families</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">🧑</div>
+            <div class="stat-value">${fmtN(data.totalAdults)}</div>
+            <div class="stat-label">Adults</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">👧</div>
+            <div class="stat-value">${fmtN(data.totalKids)}</div>
+            <div class="stat-label">Children</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">🍗</div>
+            <div class="stat-value">${fmtN(data.totalChicken)}</div>
+            <div class="stat-label">Chicken</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">🥗</div>
+            <div class="stat-value">${fmtN(data.totalVeg)}</div>
+            <div class="stat-label">Vegetarian</div>
+          </div>
+        </div>
+      `);
+
+      // Timestamp
+      setEl('last-updated', `Last updated: ${new Date().toLocaleString('en-AU')}`);
+
+    } catch (err) {
+      setEl('progress-content', `<div class="error-msg">⚠️ Could not load data — ${err.message}</div>`);
+      setEl('stats-content', '');
+      setEl('last-updated', 'Failed to load');
+    }
+  }
+
+  // ── Search ───────────────────────────────────────────────────────
+  async function doSearch() {
+    const query = document.getElementById('search-input').value.trim();
+    const out   = document.getElementById('search-results');
+    if (!query) { out.innerHTML = ''; return; }
+
+    out.innerHTML = '<div class="loading"><div class="spinner"></div> Searching…</div>';
+
+    try {
+      const data = await fetchJSON(`${SCRIPT_URL}?action=search&name=${encodeURIComponent(query)}`);
+      if (data.error) throw new Error(data.error);
+
+      const rows = Array.isArray(data.results) ? data.results : [];
+      if (!rows.length) {
+        out.innerHTML = '<div class="no-result">No matching records found.</div>';
+        return;
+      }
+
+      out.innerHTML = rows.map(r => {
+        const kids     = (parseInt(r.kids12) || 0) + (parseInt(r.kidsU12) || 0);
+        const statusCls = (r.status || '').toLowerCase().includes('paid') ? '' : ' pending';
+        return `
+          <div class="result-card">
+            <div class="result-name">👤 ${r.name}</div>
+            <div class="result-pills">
+              ${r.adults   > 0 ? `<span class="pill pill-adults">🧑 ${r.adults} Adult${r.adults!=1?'s':''}</span>` : ''}
+              ${kids       > 0 ? `<span class="pill pill-kids">👧 ${kids} Child${kids!=1?'ren':''}</span>` : ''}
+              ${r.chicken  > 0 ? `<span class="pill pill-chicken">🍗 ${r.chicken} Chicken</span>` : ''}
+              ${r.veg      > 0 ? `<span class="pill pill-veg">🥗 ${r.veg} Vegetarian</span>` : ''}
+              ${r.amount      ? `<span class="pill pill-amount">💰 $${fmt(r.amount)}</span>` : ''}
+              ${r.status      ? `<span class="pill pill-status${statusCls}">✅ ${r.status}</span>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+
+    } catch (err) {
+      out.innerHTML = `<div class="error-msg">⚠️ Search failed — ${err.message}</div>`;
+    }
+  }
+
+  // ── Events ───────────────────────────────────────────────────────
+  document.getElementById('search-btn').addEventListener('click', doSearch);
+  document.getElementById('search-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  // ── Init ─────────────────────────────────────────────────────────
+  loadSummary();
+</script>
+
+</body>
+</html>
